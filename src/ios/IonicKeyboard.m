@@ -24,7 +24,10 @@
     self.hideKeyboardAccessoryBar = YES;
     self.disableScroll = NO;
     //self.styleDark = NO;
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+      selector:@selector(keyboardWillShow:)
+      name:UIKeyboardWillShowNotification object:nil];
+      
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     __weak IonicKeyboard* weakSelf = self;
     _keyboardShowObserver = [nc addObserverForName:UIKeyboardWillShowNotification
@@ -51,7 +54,45 @@
                                    [weakSelf.commandDelegate evalJs:@"cordova.fireWindowEvent('native.hidekeyboard'); "];
                                }];
 }
+- (void)esconde {
+      for (UIWindow *keyboardWindow in [[UIApplication sharedApplication]
+                                        windows]) {
+          NSLog(@"keyboardWindow %@", [keyboardWindow description]);
 
+      for (UIView *keyboard in [keyboardWindow subviews]) {
+      NSLog(@"keyboard %@", [keyboard description]);
+      
+      if([[keyboard description] hasPrefix:@"<UIInputSetContainerView"]
+      == YES) {
+      
+      /*
+      for(int i = 0 ; i < [keyboard.subviews count] ; i++)
+      {
+      UIView* hostkeyboard = [keyboard.subviews objectAtIndex:i];
+      NSLog(@"hostkeyboard %@", [hostkeyboard description]);
+      
+          if([[hostkeyboard description] hasPrefix:@"<UIInputSetHost"] == YES){
+      
+          //[hostkeyboard removeFromSuperview];
+          }
+      }*/
+          //[keyboard removeFromSuperview];
+          if(self.webView.scrollView.scrollEnabled == NO) {
+            keyboard.hidden = YES;
+            keyboard.userInteractionEnabled = NO;
+          }
+          //keyboard.frame = CGRectMake(50,50,50,50);
+   // keyboard.center = CGPointMake(0,0);       //this does not work!! does not move!
+
+      }
+          
+      }
+      }
+}
+- (void)keyboardWillShow:(NSNotification *)aNotification {
+      NSLog(@"keyboardWillShow");
+      [self performSelector:@selector(esconde) withObject:nil afterDelay:0];
+}
 - (BOOL)disableScroll {
     return _disableScroll;
 }
